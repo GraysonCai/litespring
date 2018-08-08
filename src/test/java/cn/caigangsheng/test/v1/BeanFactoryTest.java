@@ -9,8 +9,10 @@ import cn.caigangsheng.litespring.beans.factory.BeanCreationException;
 import cn.caigangsheng.litespring.beans.factory.BeanDefinitionStoreException;
 import cn.caigangsheng.litespring.beans.factory.BeanFactory;
 import cn.caigangsheng.litespring.beans.factory.support.DefaultBeanFactory;
+import cn.caigangsheng.litespring.beans.factory.xml.XMLBeanDefinitionReader;
 import cn.caigangsheng.litespring.service.v1.PetStoreService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -18,14 +20,22 @@ import org.junit.Test;
  */
 public class BeanFactoryTest
 {
-    /**
-     * Rigorous Test :-)
-     */
+
+    private DefaultBeanFactory beanFactory = null;
+
+    private XMLBeanDefinitionReader reader = null;
+
+    @Before
+    public void setUp() {
+        beanFactory = new DefaultBeanFactory();
+        reader = new XMLBeanDefinitionReader(beanFactory);
+    }
+
     @Test
     public void testGetBean() {
-        BeanFactory beanFactory = new DefaultBeanFactory("petstore-v1.xml");
+        reader.loadBeanDefinition("petstore-v1.xml");
 
-        BeanDefinition beanDefinition = beanFactory.getBeanDefinition("petStoreService");
+        BeanDefinition beanDefinition = reader.getBeanDefinition("petStoreService");
 
         assertEquals("cn.caigangsheng.litespring.service.v1.PetStoreService", beanDefinition.getBeanClassName());
 
@@ -36,7 +46,8 @@ public class BeanFactoryTest
 
     @Test
     public void testInvalidBean() {
-        BeanFactory beanFactory = new DefaultBeanFactory("petstore-v1.xml");
+        reader.loadBeanDefinition("petstore-v1.xml");
+        BeanDefinition beanDefinition = reader.getBeanDefinition("petStoreService");
         try {
             beanFactory.getBean("invalidBean");
         } catch (BeanCreationException e) {
@@ -48,7 +59,8 @@ public class BeanFactoryTest
     @Test
     public void testNotExistConfigFile() {
         try {
-            BeanFactory beanFactory = new DefaultBeanFactory("petstore-v2.xml");
+            reader.loadBeanDefinition("petstore-v1xx.xml");
+            BeanDefinition beanDefinition = reader.getBeanDefinition("petStoreService");
         } catch (BeanDefinitionStoreException e) {
             return;
         }
