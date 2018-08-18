@@ -8,4 +8,9 @@
 
     </bean>
 
+    <bean id="invalidBean"
+          class="xxx.xxxxx" >
+    </bean>
+
+    <bean id="prototypeService" class="cn.caigangsheng.litespring.service.v1.PrototypeService" scope="prototype"></bean>
 </beans>

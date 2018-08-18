@@ -4,17 +4,28 @@ package cn.caigangsheng.litespring.utils;
  * @author cgs
  * @Date 2018-08-07 22:37
  */
-public class ClassUtils {
-
+public abstract class ClassUtils {
     public static ClassLoader getDefaultClassLoader() {
-        ClassLoader classLoader = null;
-        classLoader = Thread.currentThread().getContextClassLoader();
-        if(classLoader == null) {
-            classLoader = ClassUtils.class.getClassLoader();
-            if(classLoader == null) {
-                classLoader = ClassLoader.getSystemClassLoader();
+        ClassLoader cl = null;
+        try {
+            cl = Thread.currentThread().getContextClassLoader();
+        }
+        catch (Throwable ex) {
+            // Cannot access thread context ClassLoader - falling back...
+        }
+        if (cl == null) {
+            // No thread context class loader -> use class loader of this class.
+            cl = ClassUtils.class.getClassLoader();
+            if (cl == null) {
+                // getClassLoader() returning null indicates the bootstrap ClassLoader
+                try {
+                    cl = ClassLoader.getSystemClassLoader();
+                }
+                catch (Throwable ex) {
+                    // Cannot access system ClassLoader - oh well, maybe the caller can live with null...
+                }
             }
         }
-        return classLoader;
+        return cl;
     }
 }

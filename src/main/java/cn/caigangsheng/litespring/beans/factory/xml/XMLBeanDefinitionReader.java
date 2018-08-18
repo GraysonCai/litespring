@@ -2,12 +2,10 @@ package cn.caigangsheng.litespring.beans.factory.xml;
 
 import cn.caigangsheng.litespring.beans.BeanDefinition;
 import cn.caigangsheng.litespring.beans.factory.BeanDefinitionStoreException;
-import cn.caigangsheng.litespring.beans.factory.BeanFactory;
 import cn.caigangsheng.litespring.beans.factory.support.BeanDefinitionRegister;
 import cn.caigangsheng.litespring.beans.factory.support.GenericBeanDefinition;
-import cn.caigangsheng.litespring.utils.ClassUtils;
+import cn.caigangsheng.litespring.core.io.Resource;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
@@ -26,17 +24,18 @@ public class XMLBeanDefinitionReader {
 
     public static final String ATTRIBUTE_CLASS = "class";
 
+    public static final String ATTRIBUTE_SCOPE = "scope";
+
     private BeanDefinitionRegister register;
 
     public XMLBeanDefinitionReader(BeanDefinitionRegister register) {
         this.register = register;
     }
 
-    public void loadBeanDefinition(String configFile) {
+    public void loadBeanDefinition(Resource resource) {
         InputStream is = null;
         try {
-            ClassLoader defaultClassLoader = ClassUtils.getDefaultClassLoader();
-            is = defaultClassLoader.getResourceAsStream(configFile);
+            is = resource.getInputStream();
             SAXReader saxReader = new SAXReader();
             Document document = saxReader.read(is);
 
@@ -47,9 +46,13 @@ public class XMLBeanDefinitionReader {
                 String beanId = element.attributeValue(ATTRIBUTE_ID);
                 String beanClassName = element.attributeValue(ATTRIBUTE_CLASS);
                 BeanDefinition beanDefinition = new GenericBeanDefinition(beanId, beanClassName);
+                String scope = element.attributeValue(ATTRIBUTE_SCOPE);
+                if(scope != null) {
+                    beanDefinition.setScope(scope);
+                }
                 register.registerBeanDefinition(beanId, beanDefinition);
             }
-        } catch (DocumentException e) {
+        } catch (Exception e) {
             throw new BeanDefinitionStoreException("parse bean definition config file fail.", e);
         } finally {
             if(is != null) {
